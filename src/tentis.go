@@ -69,7 +69,7 @@ func main() {
     ginSrv := gin.Default()
 
     ginSrv.GET(
-        "/get/trash_calendar",
+        "tentis/get/trash_calendar",
         func (ctxGin *gin.Context) {
             getTrashCalendar(ctxGin)
         },

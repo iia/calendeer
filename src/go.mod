@@ -1,4 +1,4 @@
-module github.com/iia/calendeer
+module github.com/iia/tentis
 
 go 1.16
 
