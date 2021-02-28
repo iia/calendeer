@@ -1,0 +1,18 @@
+[Unit]
+Requires=docker.socket
+After=docker.service network.target
+Description=Tentis systemd service
+
+[Service]
+User=openhabian
+Type=simple
+Restart=always
+WorkingDirectory=/opt/git/iia/tentis/
+
+ExecStart=/opt/git/iia/tentis/start.sh
+ExecStop=/opt/git/iia/tentis/stop.sh
+
+RestartSec=5
+
+[Install]
+WantedBy=network-online.target
