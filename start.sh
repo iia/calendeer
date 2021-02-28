@@ -1,7 +1,7 @@
 #!/bin/sh
 
 ./stop.sh
-#test
+
 /usr/bin/docker \
 run \
 --rm \
