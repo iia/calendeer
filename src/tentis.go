@@ -14,156 +14,66 @@ import (
 
 const S_OK uint8 = 1
 const S_NOT_OK uint8 = 2
-const P_FILE_PTH_ALT_FRIDAY string = ".persist/ALT_FRIDAY"
+const ALT_FRI_ODD int = 1
+const ALT_FRI_EVEN int = 2
 
-func postAlternateFriday(ctxGin *gin.Context, oddEven string) {
-    var err error
-
-    workDir, err := os.Getwd()
-
-    if err != nil {
-        fmt.Println(err)
-
-        ctxGin.JSON(
-            http.StatusInternalServerError,
-            gin.H {
-                "s": S_NOT_OK,
-                "m": "Can't get CWD",
-            },
-        )
-
-        return
-    }
-
-    fp, err := os.OpenFile(
-        filepath.Join(workDir, P_FILE_PTH_ALT_FRIDAY),
-        os.O_TRUNC | os.O_CREATE | os.O_WRONLY,
-        0664,
-    )
-
-    if err != nil {
-        fmt.Println(err)
-
-        ctxGin.JSON(
-            http.StatusInternalServerError,
-            gin.H {
-                "s": S_NOT_OK,
-                "m": "File open failed",
-            },
-        )
-
-        return
-    }
-
-    _, err = fp.WriteString(oddEven)
-
-    if err != nil {
-        fmt.Println(err)
-
-        ctxGin.JSON(
-            http.StatusInternalServerError,
-            gin.H {
-                "s": S_NOT_OK,
-                "m": "File write failed",
-            },
-        )
-
-        return
-    }
-
-    ctxGin.JSON(
-        http.StatusOK,
-        gin.H {
-            "s": S_OK,
-            "m": true,
-        },
-    )
-}
-
-func getIsAlternateFriday(ctxGin *gin.Context) {
-    var h_stat int
+func getIsAlternateFriday(ctxGin *gin.Context, oddEven int) {
     var h gin.H
-
+    var h_stat int
     now := time.Now()
     _, _, day := now.Date()
     weekday := now.Weekday()
 
-    workDir, err := os.Getwd()
-
-    if err != nil {
-        fmt.Println(err)
-
-        ctxGin.JSON(
-            http.StatusInternalServerError,
-            gin.H {
-                "s": S_NOT_OK,
-                "m": "Can't get CWD",
-            },
-        )
-
-        return
-    }
-
-    data, err := os.ReadFile(
-        filepath.Join(workDir, P_FILE_PTH_ALT_FRIDAY),
-    )
-
-    if err != nil {
-        fmt.Println(err)
-
-        ctxGin.JSON(
-            http.StatusInternalServerError,
-            gin.H {
-                "s": S_NOT_OK,
-                "m": "File read failed",
-            },
-        )
-
-        return
-    }
-
-    switch strings.Trim(string(data), "\n") {
-        case "ODD": {
-            if weekday == time.Friday && day % 2 != 0 {
-                h_stat = http.StatusOK
-                h = gin.H {
-                    "s": S_OK,
-                    "m": true,
+    if weekday != time.Friday {
+        h = gin.H {
+            "s": S_OK,
+            "m": false,
+        }
+        h_stat = http.StatusOK
+    } else {
+        switch oddEven {
+            case ALT_FRI_ODD: {
+                if (weekday == time.Friday) && (day % 2 != 0) {
+                    h = gin.H {
+                        "s": S_OK,
+                        "m": true,
+                    }
+                    h_stat = http.StatusOK
+                } else {
+                    h = gin.H {
+                        "s": S_OK,
+                        "m": false,
+                    }
+                    h_stat = http.StatusOK
                 }
-            } else {
-                h_stat = http.StatusOK
-                h = gin.H {
-                    "s": S_OK,
-                    "m": false,
-                }
+
+                break
             }
 
-            break
-        }
+            case ALT_FRI_EVEN: {
+                if (weekday == time.Friday) && (day % 2 == 0) {
+                    h = gin.H {
+                        "s": S_OK,
+                        "m": true,
+                    }
+                    h_stat = http.StatusOK
+                } else {
+                    h = gin.H {
+                        "s": S_OK,
+                        "m": false,
+                    }
+                    h_stat = http.StatusOK
+                }
 
-        case "EVEN": {
-            if weekday == time.Friday && day % 2 == 0 {
-                h_stat = http.StatusOK
-                h = gin.H {
-                    "s": S_OK,
-                    "m": true,
-                }
-            } else {
-                h_stat = http.StatusOK
-                h = gin.H {
-                    "s": S_OK,
-                    "m": false,
-                }
+                break
             }
 
-            break
-        }
-
-        default: {
-            h_stat = http.StatusInternalServerError
-            h = gin.H {
-                "s": S_NOT_OK,
-                "m": "Unknown check option",
+            default: {
+                h = gin.H {
+                    "s": S_NOT_OK,
+                    "m": "Unknown check option",
+                }
+                h_stat = http.StatusInternalServerError
             }
         }
     }
@@ -205,7 +115,7 @@ func getTrashCalendar(ctxGin *gin.Context) {
 
     /*
      * Abfall.io API stuff found in the offered
-     * download link of iCalendar file.
+     * download link of the iCalendar file.
      */
     queryURL.Add("t", "ics")
     queryURL.Add("s", "57a5732bbba87512418093fdde1497df")
@@ -255,23 +165,16 @@ func main() {
     )
 
     ginSrv.GET(
-        "tentis/get/is_alternate_friday",
+        "tentis/get/is_alternate_friday/odd",
         func (ctxGin *gin.Context) {
-            getIsAlternateFriday(ctxGin)
+            getIsAlternateFriday(ctxGin, ALT_FRI_ODD)
         },
     )
 
-    ginSrv.POST(
-        "tentis/post/alternate_friday/odd",
+    ginSrv.GET(
+        "tentis/get/is_alternate_friday/even",
         func (ctxGin *gin.Context) {
-            postAlternateFriday(ctxGin, "ODD")
-        },
-    )
-
-    ginSrv.POST(
-        "tentis/post/alternate_friday/even",
-        func (ctxGin *gin.Context) {
-            postAlternateFriday(ctxGin, "EVEN")
+            getIsAlternateFriday(ctxGin, ALT_FRI_EVEN)
         },
     )
 
