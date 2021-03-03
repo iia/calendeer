@@ -1,12 +1,9 @@
 package main
 
 import (
-    "os"
     "fmt"
     "time"
     "net/http"
-    "strings"
-    "path/filepath"
     "github.com/gin-gonic/gin"
 )
 
