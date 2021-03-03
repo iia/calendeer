@@ -162,14 +162,14 @@ func main() {
     )
 
     ginSrv.GET(
-        "tentis/get/is_alternate_friday/odd",
+        "tentis/get/is_odd_friday",
         func (ctxGin *gin.Context) {
             getIsAlternateFriday(ctxGin, ALT_FRI_ODD)
         },
     )
 
     ginSrv.GET(
-        "tentis/get/is_alternate_friday/even",
+        "tentis/get/is_even_friday",
         func (ctxGin *gin.Context) {
             getIsAlternateFriday(ctxGin, ALT_FRI_EVEN)
         },
