@@ -14,70 +14,6 @@ const S_NOT_OK uint8 = 2
 const ALT_FRI_ODD int = 1
 const ALT_FRI_EVEN int = 2
 
-func getIsAlternateFriday(ctxGin *gin.Context, oddEven int) {
-    var h gin.H
-    var h_stat int
-    now := time.Now()
-    _, _, day := now.Date()
-    weekday := now.Weekday()
-
-    if weekday != time.Friday {
-        h = gin.H {
-            "s": S_OK,
-            "m": false,
-        }
-        h_stat = http.StatusOK
-    } else {
-        switch oddEven {
-            case ALT_FRI_ODD: {
-                if (weekday == time.Friday) && (day % 2 != 0) {
-                    h = gin.H {
-                        "s": S_OK,
-                        "m": true,
-                    }
-                    h_stat = http.StatusOK
-                } else {
-                    h = gin.H {
-                        "s": S_OK,
-                        "m": false,
-                    }
-                    h_stat = http.StatusOK
-                }
-
-                break
-            }
-
-            case ALT_FRI_EVEN: {
-                if (weekday == time.Friday) && (day % 2 == 0) {
-                    h = gin.H {
-                        "s": S_OK,
-                        "m": true,
-                    }
-                    h_stat = http.StatusOK
-                } else {
-                    h = gin.H {
-                        "s": S_OK,
-                        "m": false,
-                    }
-                    h_stat = http.StatusOK
-                }
-
-                break
-            }
-
-            default: {
-                h = gin.H {
-                    "s": S_NOT_OK,
-                    "m": "Unknown check option",
-                }
-                h_stat = http.StatusInternalServerError
-            }
-        }
-    }
-
-    ctxGin.JSON(h_stat, h)
-}
-
 func getTrashCalendar(ctxGin *gin.Context) {
     client := &http.Client{}
     req, err := http.NewRequest(
@@ -158,20 +94,6 @@ func main() {
         "tentis/get/trash_calendar",
         func (ctxGin *gin.Context) {
             getTrashCalendar(ctxGin)
-        },
-    )
-
-    ginSrv.GET(
-        "tentis/get/is_odd_friday",
-        func (ctxGin *gin.Context) {
-            getIsAlternateFriday(ctxGin, ALT_FRI_ODD)
-        },
-    )
-
-    ginSrv.GET(
-        "tentis/get/is_even_friday",
-        func (ctxGin *gin.Context) {
-            getIsAlternateFriday(ctxGin, ALT_FRI_EVEN)
         },
     )
 
